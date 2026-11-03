@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Upload Study Note - Student Notes Sharing Portal{% endblock %}
+
+{% block content %}
+<div style="max-width: 680px; margin: 1.5rem auto;">
+  
+  <div style="margin-bottom: 1.75rem;">
+    <a href="{{ url_for('index') }}" class="btn btn-secondary btn-sm" style="margin-bottom: 1rem;">
+      &larr; Back to Browse
+    </a>
+    <h1 style="font-size: 1.85rem; font-weight: 800; letter-spacing: -0.02em;">Share a Study Note</h1>
+    <p style="color: var(--text-muted); font-size: 0.95rem;">
+      Upload lecture slides, handwritten revision notes, formula sheets, or assignments for fellow classmates.
+    </p>
+  </div>
+
+  <div class="auth-card" style="padding: 2.25rem;">
+    <form action="{{ url_for('upload_note') }}" method="POST" enctype="multipart/form-data" id="upload-form">
+      
+      <!-- Note Title -->
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label for="title" class="form-label form-label-required">Document Title</label>
+        <input 
+          type="text" 
+          name="title" 
+          id="title" 
+          class="form-control" 
+          placeholder="e.g. Divide & Conquer and Dynamic Programming Notes" 
+          value="{{ title or '' }}"
+          required 
+          maxlength="150"
+        >
+        <span class="form-hint">Make it specific and easy to recognize.</span>
+      </div>
+
+      <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin-bottom: 1.25rem;">
+        <!-- Semester Dropdown -->
+        <div class="form-group">
+          <label for="semester" class="form-label form-label-required">Semester</label>
+          <select name="semester" id="semester" class="form-control" required>
+            {% for sem in all_semesters %}
+              <option value="{{ sem }}" {% if semester == sem %}selected{% endif %}>
+                {{ sem }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+
+        <!-- Type Dropdown -->
+        <div class="form-group">
+          <label for="note_type" class="form-label form-label-required">Material Type</label>
+          <select name="note_type" id="note_type" class="form-control" required>
+            {% for t in all_types %}
+              <option value="{{ t }}" {% if note_type == t %}selected{% endif %}>
+                {{ t }}
+              </option>
+            {% endfor %}
+          </select>
+        </div>
+      </div>
+
+      <!-- Subject Dropdown -->
+      <div class="form-group" style="margin-bottom: 1.25rem;">
+        <label for="subject" class="form-label form-label-required">MCA Subject</label>
+        <select name="subject" id="subject" class="form-control" required>
+          <option value="" disabled {% if not subject %}selected{% endif %}>Select an MCA subject...</option>
+          {% for sub in all_subjects %}
+            <option value="{{ sub }}" {% if subject == sub %}selected{% endif %}>
+              {{ sub }}
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+
+      <!-- Description -->
+      <div class="form-group" style="margin-bottom: 1.5rem;">
+        <label for="description" class="form-label form-label-required">Description & Topic Outline</label>
+        <textarea 
+          name="description" 
+          id="description" 
+          class="form-control" 
+          rows="4" 
+          placeholder="Summarize what this note covers (e.g. includes definitions, complexity analysis, practice problems, midterm prep)..."
+          required
+        >{{ description or '' }}</textarea>
+        <span class="form-hint">Helps students evaluate whether this document has what they need.</span>
+      </div>
+
+      <!-- File Upload Box -->
+      <div class="form-group" style="margin-bottom: 1.75rem;">
+        <label class="form-label form-label-required">Select File to Upload</label>
+        
+        <div class="file-upload-box" id="drop-zone">
+          <input 
+            type="file" 
+            name="file" 
+            id="file-input" 
+            class="file-input-hidden" 
+            accept=".pdf,.doc,.docx,.ppt,.pptx,.txt,.png,.jpg,.jpeg"
+            required
+          >
+          <div class="file-upload-icon">📤</div>
+          <div style="font-weight: 600; font-size: 1rem; color: var(--text-main); margin-bottom: 0.25rem;">
+            Click to browse or drag and drop your file here
+          </div>
+          <div style="font-size: 0.8rem; color: var(--text-muted);">
+            Supported formats: PDF, DOC, DOCX, PPT, PPTX, TXT, PNG, JPG (Max 10 MB)
+          </div>
+          <div class="selected-file-display" id="file-name-display" style="display: none;">
+            📄 Selected: <span id="selected-name"></span> (<span id="selected-size"></span>)
+          </div>
+        </div>
+      </div>
+
+      <!-- Submit & Cancel Actions -->
+      <div style="display: flex; gap: 1rem; align-items: center;">
+        <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-upload" style="flex: 2;">
+          <span>Publish Study Note</span>
+        </button>
+        <a href="{{ url_for('index') }}" class="btn btn-secondary btn-lg" style="flex: 1;">
+          Cancel
+        </a>
+      </div>
+
+    </form>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  // Show selected file name and size dynamically
+  const fileInput = document.getElementById('file-input');
+  const fileNameDisplay = document.getElementById('file-name-display');
+  const selectedName = document.getElementById('selected-name');
+  const selectedSize = document.getElementById('selected-size');
+
+  if (fileInput) {
+    fileInput.addEventListener('change', function(e) {
+      if (this.files && this.files[0]) {
+        const file = this.files[0];
+        selectedName.textContent = file.name;
+        
+        // Format size
+        let sizeText = '';
+        if (file.size < 1024) {
+          sizeText = file.size + ' B';
+        } else if (file.size < 1024 * 1024) {
+          sizeText = (file.size / 1024).toFixed(1) + ' KB';
+        } else {
+          sizeText = (file.size / (1024 * 1024)).toFixed(1) + ' MB';
+        }
+        selectedSize.textContent = sizeText;
+        fileNameDisplay.style.display = 'block';
+      } else {
+        fileNameDisplay.style.display = 'none';
+      }
+    });
+  }
+</script>
+{% endblock %}

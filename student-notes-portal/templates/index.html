@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Notes - Student Notes Sharing Portal{% endblock %}
+
+{% block content %}
+
+<!-- Hero Banner -->
+<section class="hero-section">
+  <div class="hero-content">
+    <div class="hero-badge">🎓 MCA Classroom Portal</div>
+    <h1 class="hero-title">🎓 MCA Classroom Notes Portal</h1>
+    <p class="hero-subtitle">
+      Collaborative platform for MCA students to explore, upload, and download class notes, lab manuals, and previous
+      year papers.
+    </p>
+
+    <div class="hero-stats">
+      <div class="stat-item">
+        <span class="stat-number">{{ total_notes_count }}</span>
+        <span class="stat-label">Total Shared Notes</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ total_downloads_count }}</span>
+        <span class="stat-label">Total Downloads</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{ all_subjects|length }}</span>
+        <span class="stat-label">Supported Subjects</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- Search & Subject Filter Bar -->
+<section class="filter-card" aria-label="Search and filter notes">
+  <form action="{{ url_for('index') }}" method="GET" class="filter-form">
+
+    <!-- Search Input -->
+    <div class="search-box-wrapper">
+      <span class="search-icon">🔎</span>
+      <input type="text" name="q" id="search-input" class="search-input"
+        placeholder="Search notes by title, topic, or keyword..." value="{{ search_query }}" aria-label="Search notes">
+    </div>
+
+    <!-- Subject Filter Dropdown -->
+    <div class="filter-dropdown-wrapper">
+      <select name="subject" id="subject-filter" class="filter-select" aria-label="Filter by academic subject">
+        <option value="">All Subjects</option>
+        {% for sub in all_subjects %}
+        <option value="{{ sub }}" {% if selected_subject==sub %}selected{% endif %}>
+          {{ sub }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Semester Filter Dropdown -->
+    <div class="filter-dropdown-wrapper">
+      <select name="semester" id="semester-filter" class="filter-select" aria-label="Filter by semester">
+        <option value="">All Semesters</option>
+        {% for sem in all_semesters %}
+        <option value="{{ sem }}" {% if selected_semester==sem %}selected{% endif %}>
+          {{ sem }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Type Filter Dropdown -->
+    <div class="filter-dropdown-wrapper">
+      <select name="type" id="type-filter" class="filter-select" aria-label="Filter by document type">
+        <option value="">All Types</option>
+        {% for t in all_types %}
+        <option value="{{ t }}" {% if selected_type==t %}selected{% endif %}>
+          {{ t }}
+        </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="filter-actions">
+      <button type="submit" class="btn btn-primary" id="btn-search">
+        <span>Search</span>
+      </button>
+      {% if search_query or selected_subject or selected_semester or selected_type %}
+      <a href="{{ url_for('index') }}" class="btn btn-secondary" id="btn-clear-search">
+        <span>Reset</span>
+      </a>
+      {% endif %}
+    </div>
+
+  </form>
+</section>
+
+<!-- Notes Grid Section -->
+<section aria-labelledby="notes-heading">
+  <div class="section-header">
+    <h2 id="notes-heading" class="section-title">
+      {% if search_query or selected_subject %}
+      Filtered Results
+      {% else %}
+      Recent Study Notes
+      {% endif %}
+    </h2>
+    <span class="notes-count-badge">{{ notes|length }} {% if notes|length == 1 %}note{% else %}notes{% endif %}
+      available</span>
+  </div>
+
+  {% if notes %}
+  <div class="notes-grid" id="notes-grid">
+    {% for note in notes %}
+    <article class="note-card" id="note-card-{{ note.id }}">
+
+      <div class="card-top">
+        <div class="badges-row">
+          <span class="badge-subject">📁 {{ note.subject }}</span>
+          <span class="badge-sem">🎓 {{ note.semester }}</span>
+          <span class="badge-type">📑 {{ note.note_type }}</span>
+        </div>
+
+        <!-- Download Counter Badge -->
+        <span class="badge-downloads" title="Number of times downloaded">
+          ⬇️ {{ note.download_count }}
+        </span>
+      </div>
+
+      <!-- Note Title -->
+      <h3 class="card-title">{{ note.title }}</h3>
+
+      <!-- Description -->
+      <p class="card-description">{{ note.description }}</p>
+
+      <!-- File Details -->
+      <div class="card-file-info">
+        <span>📄</span>
+        <span class="card-file-name" title="{{ note.original_filename }}">{{ note.original_filename }}</span>
+        <span>&bull;</span>
+        <span>{{ note.file_size|filesize }}</span>
+      </div>
+
+      <!-- Footer Details & Download Button -->
+      <div class="card-footer">
+        <div class="card-meta">
+          <span class="uploader-name">Uploaded by @{{ note.uploader_username }}</span>
+          <span>{{ note.created_at[:10] }}</span>
+        </div>
+
+        <a href="{{ url_for('download_note', note_id=note.id) }}" class="btn btn-primary btn-sm btn-download"
+          id="download-btn-{{ note.id }}" title="Download this document">
+          <span>Download</span>
+        </a>
+      </div>
+
+    </article>
+    {% endfor %}
+  </div>
+  {% else %}
+  <!-- Empty State -->
+  <div class="empty-state" id="empty-state-container">
+    <div class="empty-state-icon">📂</div>
+    <h3 class="empty-state-title">No study notes found</h3>
+    <p class="empty-state-desc">
+      {% if search_query or selected_subject %}
+      No documents matched your search criteria. Try using different keywords or clearing your subject filter.
+      {% else %}
+      There are currently no notes uploaded to the portal. Be the first to share your notes with fellow students!
+      {% endif %}
+    </p>
+
+    <div>
+      {% if search_query or selected_subject %}
+      <a href="{{ url_for('index') }}" class="btn btn-secondary">Clear Search Filters</a>
+      {% endif %}
+      {% if current_user %}
+      <a href="{{ url_for('upload_note') }}" class="btn btn-primary">Upload First Note</a>
+      {% else %}
+      <a href="{{ url_for('register') }}" class="btn btn-primary">Sign Up to Upload</a>
+      {% endif %}
+    </div>
+  </div>
+  {% endif %}
+</section>
+
+{% endblock %}

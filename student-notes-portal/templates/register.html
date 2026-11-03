@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+
+{% block title %}Create Account - Student Notes Sharing Portal{% endblock %}
+
+{% block content %}
+<div class="auth-wrapper">
+  <div class="auth-card">
+    
+    <div class="auth-header">
+      <div class="auth-icon-circle">📝</div>
+      <h1 class="auth-title">Create Account</h1>
+      <p class="auth-subtitle">Join the student community to start uploading and sharing study notes.</p>
+    </div>
+
+    <form action="{{ url_for('register') }}" method="POST" class="auth-form" id="register-form">
+      
+      <!-- Username Field -->
+      <div class="form-group">
+        <label for="username" class="form-label form-label-required">Username</label>
+        <input 
+          type="text" 
+          name="username" 
+          id="username" 
+          class="form-control" 
+          placeholder="e.g. alex_student" 
+          value="{{ username or '' }}"
+          required 
+          minlength="3"
+          autocomplete="username"
+        >
+        <span class="form-hint">At least 3 characters. Alphanumeric characters recommended.</span>
+      </div>
+
+      <!-- Email Field -->
+      <div class="form-group">
+        <label for="email" class="form-label form-label-required">Email Address</label>
+        <input 
+          type="email" 
+          name="email" 
+          id="email" 
+          class="form-control" 
+          placeholder="name@university.edu" 
+          value="{{ email or '' }}"
+          required 
+          autocomplete="email"
+        >
+      </div>
+
+      <!-- Password Field -->
+      <div class="form-group">
+        <label for="password" class="form-label form-label-required">Password</label>
+        <input 
+          type="password" 
+          name="password" 
+          id="password" 
+          class="form-control" 
+          placeholder="••••••••" 
+          required 
+          minlength="6"
+          autocomplete="new-password"
+        >
+        <span class="form-hint">Must be at least 6 characters.</span>
+      </div>
+
+      <!-- Confirm Password Field -->
+      <div class="form-group">
+        <label for="confirm_password" class="form-label form-label-required">Confirm Password</label>
+        <input 
+          type="password" 
+          name="confirm_password" 
+          id="confirm_password" 
+          class="form-control" 
+          placeholder="••••••••" 
+          required 
+          minlength="6"
+          autocomplete="new-password"
+        >
+      </div>
+
+      <!-- Submit Button -->
+      <button type="submit" class="btn btn-primary btn-lg" id="btn-submit-register" style="width: 100%; margin-top: 0.5rem;">
+        Sign Up
+      </button>
+
+    </form>
+
+    <div class="auth-footer">
+      <span>Already have an account? </span>
+      <a href="{{ url_for('login') }}" id="link-to-login"><strong>Log in here</strong></a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

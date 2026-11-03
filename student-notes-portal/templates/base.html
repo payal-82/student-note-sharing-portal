@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}🎓 MCA Classroom Notes Portal{% endblock %}</title>
+  <meta name="description" content="Collaborative platform for MCA students to explore, upload, and download class notes, lab manuals, and previous year papers.">
+  
+  <!-- Custom Indigo Theme Stylesheet (No frameworks) -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <header class="navbar">
+    <div class="container nav-container">
+      <a href="{{ url_for('index') }}" class="brand-link" id="nav-brand-link">
+        <div class="brand-icon">🎓</div>
+        <div class="brand-text">MCA<span>Notes</span></div>
+      </a>
+
+      <nav>
+        <ul class="nav-menu">
+          <li class="nav-item">
+            <a href="{{ url_for('index') }}" id="nav-home-link">Explore Notes</a>
+          </li>
+
+          {% if current_user %}
+            <li class="nav-item">
+              <a href="{{ url_for('upload_note') }}" id="nav-upload-link" class="btn btn-primary btn-sm">
+                <span>➕ Upload Note</span>
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('my_notes') }}" id="nav-my-notes-link">My Notes</a>
+            </li>
+            <li class="nav-item">
+              <div class="nav-user" title="Logged in as {{ current_user.username }}">
+                <span>Welcome, <strong>{{ current_user.username }}</strong> 👋</span>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('logout') }}" id="nav-logout-link" class="btn btn-secondary btn-sm">Logout</a>
+            </li>
+          {% else %}
+            <li class="nav-item">
+              <a href="{{ url_for('login') }}" id="nav-login-link">Log In</a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('register') }}" id="nav-register-link" class="btn btn-primary btn-sm">Sign Up</a>
+            </li>
+          {% endif %}
+        </ul>
+      </nav>
+    </div>
+  </header>
+
+  <!-- Main Content Area -->
+  <main class="main-content">
+    <div class="container">
+
+      <!-- Flash Messages for Success, Errors, Warnings -->
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <div class="flash-container" id="flash-container">
+            {% for category, message in messages %}
+              <div class="alert alert-{{ category if category != 'message' else 'info' }}" role="alert">
+                <div class="alert-content">
+                  {% if category == 'success' %}
+                    <span>✅</span>
+                  {% elif category == 'error' %}
+                    <span>⚠️</span>
+                  {% elif category == 'warning' %}
+                    <span>🔔</span>
+                  {% else %}
+                    <span>ℹ️</span>
+                  {% endif %}
+                  <span>{{ message }}</span>
+                </div>
+                <button type="button" class="alert-close" onclick="this.parentElement.remove()" aria-label="Close message">&times;</button>
+              </div>
+            {% endfor %}
+          </div>
+        {% endif %}
+      {% endwith %}
+
+      <!-- Custom 404 Block if not found -->
+      {% if not_found %}
+        <div class="empty-state">
+          <div class="empty-state-icon">🔍</div>
+          <h2 class="empty-state-title">Page Not Found</h2>
+          <p class="empty-state-desc">The page you were looking for does not exist or has been relocated.</p>
+          <a href="{{ url_for('index') }}" class="btn btn-primary">Return to Home</a>
+        </div>
+      {% else %}
+        <!-- Page-specific Jinja Block -->
+        {% block content %}{% endblock %}
+      {% endif %}
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container footer-content">
+      <p>&copy; {{ now.year if now else '2026' }} Student Notes Sharing Portal. Built with Python Flask & SQLite.</p>
+      <div class="footer-links">
+        <a href="{{ url_for('index') }}">Browse Notes</a>
+        {% if current_user %}
+          <a href="{{ url_for('upload_note') }}">Upload Note</a>
+          <a href="{{ url_for('my_notes') }}">My Notes</a>
+        {% else %}
+          <a href="{{ url_for('login') }}">Sign In</a>
+          <a href="{{ url_for('register') }}">Create Account</a>
+        {% endif %}
+      </div>
+    </div>
+  </footer>
+
+  <!-- Simple Client-side Scripts -->
+  <script>
+    // Automatically close flash alerts after 6 seconds
+    setTimeout(function() {
+      const container = document.getElementById('flash-container');
+      if (container) {
+        container.style.transition = 'opacity 0.5s ease';
+        container.style.opacity = '0';
+        setTimeout(() => container.remove(), 500);
+      }
+    }, 6000);
+  </script>
+  {% block scripts %}{% endblock %}
+
+</body>
+</html>

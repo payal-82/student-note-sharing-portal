@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block title %}My Notes - Student Notes Sharing Portal{% endblock %}
+
+{% block content %}
+<div style="margin-bottom: 2rem;">
+  
+  <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 1rem; margin-bottom: 1.5rem;">
+    <div>
+      <h1 style="font-size: 1.85rem; font-weight: 800; letter-spacing: -0.02em;">My Uploaded Notes</h1>
+      <p style="color: var(--text-muted); font-size: 0.95rem;">
+        Manage your study resources, review your download metrics, or remove outdated documents.
+      </p>
+    </div>
+    
+    <a href="{{ url_for('upload_note') }}" class="btn btn-primary" id="btn-upload-new">
+      <span>➕ Upload New Note</span>
+    </a>
+  </div>
+
+  {% if notes %}
+    <div class="table-card">
+      <div class="table-responsive">
+        <table class="portal-table" id="my-notes-table">
+          <thead>
+            <tr>
+              <th style="min-width: 250px;">Note Details</th>
+              <th>Subject</th>
+              <th>File Name</th>
+              <th>Size</th>
+              <th>Downloads</th>
+              <th>Uploaded Date</th>
+              <th style="text-align: right;">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for note in notes %}
+              <tr id="my-note-row-{{ note.id }}">
+                
+                <!-- Note Title & Description -->
+                <td>
+                  <span class="table-title">{{ note.title }}</span>
+                  <span class="table-desc">{{ note.description }}</span>
+                </td>
+
+                <!-- Subject Badge & Tags -->
+                <td>
+                  <span class="badge-subject" style="display: block; margin-bottom: 0.25rem;">
+                    📁 {{ note.subject }}
+                  </span>
+                  <span class="badge-sem" style="display: inline-block; font-size: 0.75rem; padding: 0.15rem 0.5rem; background: #f3e8ff; color: #6b21a8; border-radius: 9999px;">
+                    🎓 {{ note.semester }}
+                  </span>
+                  <span class="badge-type" style="display: inline-block; font-size: 0.75rem; padding: 0.15rem 0.5rem; background: #dbeafe; color: #1e40af; border-radius: 9999px;">
+                    📑 {{ note.note_type }}
+                  </span>
+                </td>
+
+                <!-- Original File Name -->
+                <td>
+                  <span style="font-weight: 500; color: var(--text-main);">
+                    {{ note.original_filename }}
+                  </span>
+                </td>
+
+                <!-- File Size -->
+                <td>
+                  <span style="color: var(--text-muted); font-size: 0.85rem;">
+                    {{ note.file_size|filesize }}
+                  </span>
+                </td>
+
+                <!-- Download Count -->
+                <td>
+                  <span class="badge-downloads" id="download-count-{{ note.id }}">
+                    ⬇️ {{ note.download_count }}
+                  </span>
+                </td>
+
+                <!-- Upload Date -->
+                <td>
+                  <span style="color: var(--text-muted); font-size: 0.85rem;">
+                    {{ note.created_at[:10] }}
+                  </span>
+                </td>
+
+                <!-- Actions: Download & Delete -->
+                <td style="text-align: right;">
+                  <div class="table-actions" style="justify-content: flex-end;">
+                    
+                    <!-- Download Link -->
+                    <a 
+                      href="{{ url_for('download_note', note_id=note.id) }}" 
+                      class="btn btn-secondary btn-sm"
+                      title="Download copy"
+                      id="my-download-{{ note.id }}"
+                    >
+                      <span>⬇️ Download</span>
+                    </a>
+
+                    <!-- Owner-only POST Delete Form -->
+                    <form 
+                      action="{{ url_for('delete_note', note_id=note.id) }}" 
+                      method="POST" 
+                      style="display: inline-block; margin: 0;"
+                      onsubmit="return confirm('Are you sure you want to permanently delete \'{{ note.title }}\'? This cannot be undone.');"
+                    >
+                      <button 
+                        type="submit" 
+                        class="btn btn-outline-danger btn-sm" 
+                        id="delete-note-btn-{{ note.id }}"
+                        title="Delete this note"
+                      >
+                        <span>🗑️ Delete</span>
+                      </button>
+                    </form>
+
+                  </div>
+                </td>
+
+              </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  {% else %}
+    <!-- Empty State -->
+    <div class="empty-state">
+      <div class="empty-state-icon">📚</div>
+      <h3 class="empty-state-title">You haven't uploaded any notes yet</h3>
+      <p class="empty-state-desc">
+        Help your fellow students by sharing lecture notes, assignment solutions, revision formulas, and past exam prep materials.
+      </p>
+      <a href="{{ url_for('upload_note') }}" class="btn btn-primary btn-lg">
+        Upload Your First Note
+      </a>
+    </div>
+  {% endif %}
+
+</div>
+{% endblock %}

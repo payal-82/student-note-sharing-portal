@@ -1,0 +1,28 @@
+# Virtual Environments
+venv/
+env/
+ENV/
+student-notes-portal/venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+*$py.class
+.pytest_cache/
+
+# Environment Variables & Secrets
+.env
+.env.local
+.streamlit/secrets.toml
+
+# Local Databases
+*.db
+*.sqlite3
+notes_portal.db
+student-notes-portal/notes_portal.db
+
+# Temporary & OS Files
+Thumbs.db
+Desktop.ini
+.DS_Store
+*.log
